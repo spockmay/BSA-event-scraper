@@ -24,6 +24,7 @@ def scrape_scouting_calendar():
         "Eagle BOR",
         "Pipestone",
         "Marksmanship",
+        "Summer Camp",
     ]
 
     color_filter = "#008000"

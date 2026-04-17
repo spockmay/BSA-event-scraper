@@ -43,6 +43,7 @@ def scrape_scouting_calendar(org_key, categoryIds):
         "Adventure Programs",
         "Marnoc Lodge",
         "Soaring Eagle District",
+        "Summer Camp",
     ]
 
     params = {

@@ -1,52 +1,19 @@
 import requests
 from datetime import datetime, timedelta
 
-FILTER = [
-    "sm basic",
-    "eagle scout",
-    "birthday",
-    "eagle board",
-    "eagle bor",
-    "baloo",
-    "Stewards of beaumont",
-    "wilderness engineers",
-    "mobile climbing wall",
-    "wood badge",
-    "summer camp",
-    "stem summer",
-    "cub adventures",
-    "rangemaster",
-    "roundtable",
-    "camp gray",
-    "cubber",
-    "stewards of firelands",
-    "sacred texts",
-    "badge lab",
-    " day",
-    "committee",
-    "eagle project",
-    "cub scout",
-    "round table",
-    "meeting",
-    "popcorn",
-    "huddle",
-    "show-n-sell",
-    "show and sell",
-    "instructor",
-    "marnoc lodge",
-    "closed for",
-    "distribution",
-    "renewals",
-    "commissioners",
-    "pinewood derb",
-    "flower sale",
-    "swim check",
-    "retreat",
-    "banquet",
-]
+from event import Event
 
 
-def scrape_scoutcal_json(id):
+def scrape_scoutcal_json(id: str) -> dict:
+    """
+    Scrape the JSON event data from the Council with the provided id.
+    This only works for councils that use Black Pug's scoutcalendar site
+
+    :param id: the ID of the council's JSON calendar
+    :type id: str
+    :return: all of the council events
+    :rtype: dict
+    """
     try:
         url = "https://scoutcal.com/%s.json" % (id,)
         response = requests.get(url)
@@ -54,49 +21,30 @@ def scrape_scoutcal_json(id):
         return response.json()
     except requests.exceptions.RequestException as e:
         print(f"Error making request: {e}")
-        return None
+        return {}
     except Exception as e:
         print(f"Error parsing HTML or data extraction: {e}")
-        return None
+        return {}
 
 
-def is_event_timely(event, tstart, tend):
-    if event.get("start", None) is None:
-        print(event)
-        return False
-    if event["start"] >= tstart and event["start"] <= tend:
-        return True
-    return False
+def json_to_event(json_event: dict) -> Event:
+    """
+    Takes an individual scoutcal event dictionary and converts it to an Event object
+
+    :param json_event: the json scoutcal event
+    :type json_event: dict
+    :return: the Event object for the event
+    :rtype: Event
+    """
+    return Event(
+        title=json_event.get("EVENT_TITLE", "No Title"),
+        start=datetime.strptime(json_event.get("SDATE_FMT", "N/A"), "%Y%m%d"),
+        end=datetime.strptime(json_event.get("EDATE_FMT", "N/A"), "%Y%m%d"),
+        url=json_event.get("URL", "No URL"),
+    )
 
 
-def is_event_meaningful(event):
-    for filt in FILTER:
-        if filt in event["title"].lower():
-            return False
-    return True
-
-
-def json_to_event(json_event):
-    # Initialize a dictionary for each event
-    return {
-        "title": json_event.get("EVENT_TITLE", "No Title"),
-        "start": datetime.strptime(
-            json_event.get("SDATE_FMT", "N/A"), "%Y%m%d"
-        ),
-        "end": datetime.strptime(json_event.get("EDATE_FMT", "N/A"), "%Y%m%d"),
-        "url": json_event.get("URL", "No URL"),
-    }
-
-
-def print_event(event):
-    print("-" * 20)
-    print(f"Title: {event.get('title')}")
-    print(f"Start: {event.get('start')}")
-    print(f"End: {event.get('end')}")
-    print(f"URL: {event.get('url')}")
-
-
-def main():
+if __name__ == "__main__":
     councils = [
         ("Lake Erie Council", "20364"),
         ("Great Trail Council", "19108"),
@@ -114,13 +62,10 @@ def main():
         print(council[0])
         for json_event in j:
             event = json_to_event(json_event)
-            if is_event_meaningful(event):
-                if is_event_timely(event, t_now, t_end):
+            if event.is_meaningful():
+                if event.is_timely(t_now, t_end):
                     events.append(event)
 
         for event in events:
-            print_event(event)
-
-
-if __name__ == "__main__":
-    main()
+            print("-" * 20)
+            print(event)

@@ -2,8 +2,10 @@ import requests
 import json
 from datetime import datetime, timedelta
 
+from event import Event
 
-def scrape_scouting_calendar():
+
+def scrape_buckeye_calendar():
     """
     Scrapes all events from a specific calendar API endpoint that returns
     JSON data. It then extracts individual events and applies a title filter.
@@ -14,25 +16,12 @@ def scrape_scouting_calendar():
               with keys for 'title', 'start', 'end', and 'url'.
         None: If the request fails.
     """
-    # Define a list of titles to ignore
-    titles_to_ignore = [
-        "Eagle Boards",
-        "SM Basic",
-        "Sign-Up Event",
-        "Loop Lab",
-        "Wood Badge",
-        "Eagle BOR",
-        "Pipestone",
-        "Marksmanship",
-        "Summer Camp",
-    ]
-
     color_filter = "#008000"
 
     start_date = datetime.now()
     formatted_events = []
 
-    for i in range(0, 8):
+    for i in range(0, 8):  # get data for next 12 months
         end_date = start_date + timedelta(days=35)
 
         url = (
@@ -47,17 +36,15 @@ def scrape_scouting_calendar():
             response.raise_for_status()  # Raise an exception for bad status codes (4xx or 5xx)
 
             events_json = response.json()
-
             # The JSON data is a dictionary where the values are the event objects.
             for event_data in events_json:
-                event_title = event_data.get("title", "No Title")
+                event = Event()
+                event.title = event_data.get("title", "No Title")
 
                 # Check if the title contains any of the strings in the ignore list
                 should_ignore = False
-                for ignored_title in titles_to_ignore:
-                    if ignored_title.lower() in event_title.lower():
-                        should_ignore = True
-                        break
+                if not event.is_meaningful():
+                    should_ignore = True
 
                 if event_data.get("color", "#008000") != color_filter:
                     should_ignore = True
@@ -66,20 +53,17 @@ def scrape_scouting_calendar():
                     continue
 
                 # Extract the necessary data from the JSON object
-                event_url = event_data.get("eventPageURL", "No URL")
+                event.url = event_data.get("eventPageURL", "No URL")
 
                 # The start and end dates contain time information, so we split to get only the date.
-                event_start = event_data.get("start", "N/A").split("T")[0]
-                event_end = event_data.get("end", "N/A").split("T")[0]
-
-                formatted_events.append(
-                    {
-                        "title": event_title,
-                        "start": event_start,
-                        "end": event_end,
-                        "url": event_url,
-                    }
+                event.start = datetime.strptime(
+                    event_data.get("start", "N/A").split("T")[0], "%Y-%m-%d"
                 )
+                event.end = datetime.strptime(
+                    event_data.get("end", "N/A").split("T")[0], "%Y-%m-%d"
+                )
+
+                formatted_events.append(event)
             start_date = end_date + timedelta(days=1)
         except requests.exceptions.RequestException as e:
             print(f"Error making request: {e}")
@@ -96,15 +80,12 @@ def scrape_scouting_calendar():
 
 if __name__ == "__main__":
     print("Scraping events from the Buckeye Council calendar...")
-    events = scrape_scouting_calendar()
+    events = scrape_buckeye_calendar()
 
     if events:
-        print(f"Found {len(events)} events:")
+        print(f"Found {len(events)} events")
         for event in events:
             print("-" * 20)
-            print(f"Title: {event.get('title')}")
-            print(f"Start: {event.get('start')}")
-            print(f"End: {event.get('end')}")
-            print(f"URL: {event.get('url')}")
+            print(event)
     else:
         print("Failed to retrieve events.")

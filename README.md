@@ -24,3 +24,5 @@ Custom scraper for the Buckeye Council website.
 ---
 
 Development Note: This project is 100% human-authored. No Large Language Models (LLMs) or generative AI tools were used in the writing of this code, logic, or documentation.
+
+This project is not affiliated with Scouting America or BSA and is simply a tool to make the life of one ASM easier.

@@ -4,7 +4,27 @@ from datetime import datetime, timedelta
 from event import Event
 
 
-def scrape_scoutcal_json(id: str) -> dict:
+def scrape_scoutcal_json(
+    id: str, t_start: datetime | None = None, t_end: datetime | None = None
+):
+    if t_start is None:
+        t_start = datetime.now()
+    if t_end is None:
+        t_end = t_start + timedelta(weeks=52)
+
+    j = scrape_to_dict(id)
+
+    events = []
+    for json_event in j:
+        event = json_to_event(json_event)
+        if event.is_meaningful():
+            if event.is_timely(t_start, t_end):
+                events.append(event)
+
+    return events
+
+
+def scrape_to_dict(id: str) -> dict:
     """
     Scrape the JSON event data from the Council with the provided id.
     This only works for councils that use Black Pug's scoutcalendar site
@@ -53,18 +73,10 @@ if __name__ == "__main__":
     t_now = datetime.now()
     t_end = t_now + timedelta(weeks=52)
 
-    events = []
-
     print("Scraping events from the Scouting Event calendar...")
 
     for council in councils:
-        j = scrape_scoutcal_json(council[1])
-        print(council[0])
-        for json_event in j:
-            event = json_to_event(json_event)
-            if event.is_meaningful():
-                if event.is_timely(t_now, t_end):
-                    events.append(event)
+        events = scrape_scoutcal_json(council[1], t_now, t_end)
 
         for event in events:
             print("-" * 20)

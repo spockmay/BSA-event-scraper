@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from event import Event
 
 
-def scrape_buckeye_calendar():
+def scrape_buckeye_calendar(t_start, t_end):
     """
     Scrapes all events from a specific calendar API endpoint that returns
     JSON data. It then extracts individual events and applies a title filter.
@@ -63,7 +63,9 @@ def scrape_buckeye_calendar():
                     event_data.get("end", "N/A").split("T")[0], "%Y-%m-%d"
                 )
 
-                formatted_events.append(event)
+                if event.start >= t_start and event.start <= t_end:
+                    formatted_events.append(event)
+
             start_date = end_date + timedelta(days=1)
         except requests.exceptions.RequestException as e:
             print(f"Error making request: {e}")
@@ -80,7 +82,10 @@ def scrape_buckeye_calendar():
 
 if __name__ == "__main__":
     print("Scraping events from the Buckeye Council calendar...")
-    events = scrape_buckeye_calendar()
+    t_now = datetime.now()
+    t_end = t_now + timedelta(weeks=52)
+
+    events = scrape_buckeye_calendar(t_now, t_end)
 
     if events:
         print(f"Found {len(events)} events")

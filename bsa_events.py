@@ -10,7 +10,7 @@ all_events = []
 
 # Scrape Buckeye
 print("Scraping events from the Buckeye Council's calendar...")
-events = scrape_buckeye_calendar()
+events = scrape_buckeye_calendar(t_now, t_end)
 print("  %s events found." % len(events))
 all_events.extend(events)
 
@@ -28,6 +28,8 @@ for council in councils:
 
 # sort events
 all_events.sort(key=lambda x: x.start)
+
+# print events
 for event in all_events:
     print("-" * 20)
     print(event)

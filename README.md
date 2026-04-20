@@ -1,3 +1,5 @@
+![AI-Free](https://img.shields.io/badge/AI--Free-Handcrafted-orange)
+
 # BSA event scraper
 Scrapes BSA council events into a single report. Our troop uses this to help with semi-annual planning. 
 
@@ -18,3 +20,7 @@ This is the scraper for the Black Pug software (https://scoutingevent.com). This
 
 ## buckeye.py
 Custom scraper for the Buckeye Council website.
+
+---
+
+Development Note: This project is 100% human-authored. No Large Language Models (LLMs) or generative AI tools were used in the writing of this code, logic, or documentation.

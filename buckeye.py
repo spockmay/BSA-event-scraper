@@ -40,6 +40,7 @@ def scrape_buckeye_calendar(t_start, t_end):
             for event_data in events_json:
                 event = Event()
                 event.title = event_data.get("title", "No Title")
+                event.council = "BEC"
 
                 # Check if the title contains any of the strings in the ignore list
                 should_ignore = False

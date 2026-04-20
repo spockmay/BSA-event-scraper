@@ -55,6 +55,7 @@ class Event:
     start = None
     end = None
     url = "No URL"
+    council = ""
 
     def __init__(
         self,
@@ -62,18 +63,20 @@ class Event:
         start: datetime | None = None,
         end: datetime | None = None,
         url: str = "No URL",
+        council: str = "",
     ) -> None:
         self.title = title
         self.start = start
         self.end = end
         self.url = url
+        self.council = council
 
     def __repr__(self) -> str:
         if self.start is not None and self.end is not None:
             t_start = self.start.strftime("%Y-%m-%d")
             t_end = self.end.strftime("%Y-%m-%d")
         return (
-            f"Title: {self.title}\n"
+            f"Title: {self.title} - {self.council}\n"
             f"Start: {t_start}\n"
             f"End: {t_end}\n"
             f"URL: {self.url}"

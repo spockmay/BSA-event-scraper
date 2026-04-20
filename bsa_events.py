@@ -16,13 +16,13 @@ all_events.extend(events)
 
 # Scrape scoutcal councils
 councils = [
-    ("Lake Erie Council", "20364"),
-    ("Great Trail Council", "19108"),
+    ("Lake Erie Council", "LEC", "20364"),
+    ("Great Trail Council", "GTC", "19108"),
 ]
 
 for council in councils:
     print(f"Scraping events from {council[0]}'s calendar...")
-    events = scrape_scoutcal_json(council[1], t_now, t_end)
+    events = scrape_scoutcal_json(council[2], council[1], t_now, t_end)
     print("  %s events found." % len(events))
     all_events.extend(events)
 
